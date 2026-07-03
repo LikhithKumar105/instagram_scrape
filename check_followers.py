@@ -1,9 +1,11 @@
+import re
 import os
 import json
 import smtplib
 from email.message import EmailMessage
-import instaloader
 from datetime import datetime, timezone
+from playwright.sync_api import sync_playwright
+
 
 USERNAME = "creators.almanac"
 TARGET = 500000
@@ -96,6 +98,46 @@ Go congratulate them before everyone else!
         smtp.send_message(msg)
 
 
+
+
+
+def parse_count(text):
+    text = text.upper().replace(",", "")
+
+    if text.endswith("K"):
+        return int(float(text[:-1]) * 1000)
+
+    if text.endswith("M"):
+        return int(float(text[:-1]) * 1_000_000)
+
+    return int(text)
+
+
+def get_followers(username):
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+
+        page = browser.new_page()
+
+        page.goto(
+            f"https://www.instagram.com/{username}/",
+            wait_until="networkidle"
+        )
+
+        text = page.locator("body").inner_text()
+
+        browser.close()
+
+    match = re.search(
+        r'([\d.,]+[KM]?)\s+followers',
+        text,
+        re.IGNORECASE
+    )
+
+    if not match:
+        raise Exception("Could not find follower count.")
+
+    return parse_count(match.group(1))
 def main():
     state = load_state()
 
@@ -103,14 +145,7 @@ def main():
         print("Email already sent.")
         return
 
-    loader = instaloader.Instaloader()
-
-    profile = instaloader.Profile.from_username(
-        loader.context,
-        USERNAME
-    )
-
-    followers = profile.followers
+    followers = get_followers(USERNAME)
 
     print(f"Followers: {followers}")
 
@@ -139,5 +174,6 @@ def main():
         print("500k email sent.")
     else:
         print("Target not reached.")
+
 if __name__ == "__main__":
     main()
