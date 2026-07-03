@@ -2,8 +2,7 @@ name: Instagram Follower Check
 
 on:
   schedule:
-  - cron: "0 * * * *"
-
+    - cron: "0 * * * *"   # runs every hour
   workflow_dispatch:
 
 jobs:
@@ -20,13 +19,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
-      - name: Install packages
+      - name: Install dependencies
         run: |
           pip install -r requirements.txt
 
-      - name: Run script
+      - name: Install Playwright browsers
+        run: |
+          python -m playwright install chromium
+
+      - name: Run tracker
         env:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
@@ -34,7 +37,7 @@ jobs:
         run: |
           python check_followers.py
 
-      - name: Commit state file
+      - name: Save state
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
