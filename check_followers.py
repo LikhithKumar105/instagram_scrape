@@ -128,13 +128,11 @@ def get_followers(username):
 
         browser.close()
 
-    matches = re.findall(
-        r'([\d.,]+[KM]?)',
+    match = re.search(
+        r'([\d.,]+[KM]?)\s*\n?\s*followers',
         text,
         re.IGNORECASE
     )
-
-    print(matches[:20])
 
     if not match:
         raise Exception("Could not find follower count.")
