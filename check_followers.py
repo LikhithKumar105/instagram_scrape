@@ -128,6 +128,8 @@ def get_followers(username):
 
         browser.close()
 
+    print(text[:3000])
+
     match = re.search(
         r'([\d.,]+[KM]?)\s+followers',
         text,
