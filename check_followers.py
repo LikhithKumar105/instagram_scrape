@@ -125,6 +125,9 @@ def get_followers(username):
         )
 
         text = page.locator("body").inner_text()
+        print("====== PAGE TEXT ======")
+        print(text[:3000])
+        print("====== END ======")
 
         browser.close()
 
