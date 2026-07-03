@@ -1,3 +1,5 @@
 {
-  "sent": false
+  "sent": false,
+  "pre_alert_sent": false,
+  "last_check": null
 }
